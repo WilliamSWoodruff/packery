@@ -119,14 +119,17 @@ Packery.prototype._resetLayout = function() {
   this.getSize();
 
   this._getMeasurements();
-
-  // reset packer
+  // reset packery
   var packer = this.packer;
   // packer settings, if horizontal or vertical
   if ( this.options.isHorizontal ) {
     packer.width = Number.POSITIVE_INFINITY;
     packer.height = this.size.innerHeight + this.gutter;
     packer.sortDirection = 'rightwardTopToBottom';
+  } else if ( this.options.tileMode ) {
+    packer.width = this.size.innerWidth + this.gutter;
+    packer.height = Number.POSITIVE_INFINITY;
+    packer.sortDirection = 'tilesSorter';
   } else {
     packer.width = this.size.innerWidth + this.gutter;
     packer.height = Number.POSITIVE_INFINITY;
@@ -153,6 +156,27 @@ Packery.prototype._getMeasurements = function() {
 Packery.prototype._getItemLayoutPosition = function( item ) {
   this._packItem( item );
   return item.rect;
+};
+
+
+Packery.prototype.addedOneBeforeEnd = function( elems ) {
+  var items = this._itemize( elems );
+  if ( !items.length ) {
+    return;
+  }
+  
+  var itemsBefore = this.items.slice(0, -1);
+  var itemsAfter = this.items.slice(-1);
+  
+  this.items = itemsBefore.concat( items ).concat( itemsAfter );
+  // start new layout
+  this._resetLayout();
+  this._manageStamps();
+  // layout new stuff without transition
+  this.layoutItems( items, true );
+  this.reveal( items );
+  // layout previous items
+  this.layout();
 };
 
 
@@ -257,6 +281,10 @@ Packery.prototype._manageStamp = function( elem ) {
 
 // -------------------------- methods -------------------------- //
 
+function tilesSorter( a,b ) {
+  return a.position.y - b.position.y || a.position.x - b.position.x;
+}
+
 function verticalSorter( a, b ) {
   return a.position.y - b.position.y || a.position.x - b.position.x;
 }
@@ -266,8 +294,24 @@ function horizontalSorter( a, b ) {
 }
 
 Packery.prototype.sortItemsByPosition = function() {
-  var sorter = this.options.isHorizontal ? horizontalSorter : verticalSorter;
+  var sorter;
+  
+  ///////////////// 
+  ///////////////// 
+  ///////////////// This gets run after a card gets dropped
+  ///////////////// 
+  ///////////////// 
+  
+  if( this.options.tileMode ) {
+    sorter = tilesSorter;
+  } else if( this.options.isHorizontal ) {
+    sorter = horizontalSorter;
+  } else {
+    sorter = verticalSorter;
+  }
+  
   this.items.sort( sorter );
+  
 };
 
 /**
@@ -351,7 +395,15 @@ Packery.prototype.resize = function() {
   // check that this.size and size are there
   // IE8 triggers resize on body size change, so they might not be
   var hasSizes = this.size && size;
-  var innerSize = this.options.isHorizontal ? 'innerHeight' : 'innerWidth';
+  
+  var innerSize;
+  
+  if( this.options.isHorizontal ) {
+    innerSize = 'innerHeight';
+  } else {
+    innerSize = 'innerWidth';
+  }
+  
   if ( hasSizes && size[ innerSize ] == this.size[ innerSize ] ) {
     return;
   }

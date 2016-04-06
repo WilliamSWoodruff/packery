@@ -78,6 +78,7 @@ Item.prototype.dragStart = function() {
  * @param {Number} y - vertical position of dragged item
  */
 Item.prototype.dragMove = function( x, y ) {
+  
   this.didDrag = true;
   var packerySize = this.layout.size;
   x -= packerySize.paddingLeft;
@@ -120,7 +121,7 @@ Item.prototype.getPlaceRectCoord = function( coord, isX, isMaxOpen ) {
   var size = this.size[ 'outer' + measure ];
   var segment = this.layout[ isX ? 'columnWidth' : 'rowHeight' ];
   var parentSize = this.layout.size[ 'inner' + measure ];
-
+  
   // additional parentSize calculations for Y
   if ( !isX ) {
     parentSize = Math.max( parentSize, this.layout.maxY );

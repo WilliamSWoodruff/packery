@@ -90,9 +90,10 @@ Packer.prototype.placed = function( rect ) {
   }
 
   this.spaces = revisedSpaces;
-
+  
   this.mergeSortSpaces();
 };
+
 
 Packer.prototype.mergeSortSpaces = function() {
   // remove redundant spaces
@@ -155,9 +156,12 @@ var sorters = {
   // left to right, then top down
   rightwardTopToBottom: function( a, b ) {
     return a.x - b.x || a.y - b.y;
+  },
+  // custom tiles sorter
+  tilesSorter: function( a,b ) {
+    return a.y - b.y || a.x - b.x;
   }
 };
-
 
 // --------------------------  -------------------------- //
 

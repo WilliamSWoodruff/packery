@@ -3,7 +3,7 @@
  * bin-packing layout library
  *
  * Licensed GPLv3 for open source use
- * or Flickity Commercial License for commercial use
+ * or Packery Commercial License for commercial use
  *
  * http://packery.metafizzy.co
  * Copyright 2015 Metafizzy
@@ -633,7 +633,7 @@ if ( typeof define === 'function' && define.amd ) {
  */
 
 ;(function () {
-    
+    'use strict';
 
     /**
      * Class for managing events.
@@ -1190,7 +1190,7 @@ if ( typeof define === 'function' && define.amd ) {
 
 ( function( ElemProto ) {
 
-  
+  'use strict';
 
   var matchesMethod = ( function() {
     // check for the standard method name first
@@ -1296,7 +1296,7 @@ if ( typeof define === 'function' && define.amd ) {
 
 ( function( window, factory ) {
   /*global define: false, module: false, require: false */
-  
+  'use strict';
   // universal module definition
 
   if ( typeof define == 'function' && define.amd ) {
@@ -1563,7 +1563,7 @@ return utils;
  */
 
 ( function( window, factory ) {
-  
+  'use strict';
   // universal module definition
   if ( typeof define === 'function' && define.amd ) {
     // AMD
@@ -1599,7 +1599,7 @@ return utils;
   }
 
 }( window, function factory( window, EventEmitter, getSize, getStyleProperty, utils ) {
-
+'use strict';
 
 // ----- helpers ----- //
 
@@ -2150,7 +2150,7 @@ return Item;
  */
 
 ( function( window, factory ) {
-  
+  'use strict';
   // universal module definition
 
   if ( typeof define == 'function' && define.amd ) {
@@ -2189,7 +2189,7 @@ return Item;
   }
 
 }( window, function factory( window, eventie, EventEmitter, getSize, utils, Item ) {
-
+'use strict';
 
 // ----- vars ----- //
 
@@ -3076,7 +3076,7 @@ return Outlayer;
  */
 
 ( function( window, factory ) {
-  
+  'use strict';
   // universal module definition
   if ( typeof define == 'function' && define.amd ) {
     // AMD
@@ -3091,7 +3091,7 @@ return Outlayer;
   }
 
 }( window, function factory() {
-
+'use strict';
 
 // -------------------------- Packery -------------------------- //
 
@@ -3235,7 +3235,7 @@ return Rect;
  */
 
 ( function( window, factory ) {
-  
+  'use strict';
   // universal module definition
   if ( typeof define == 'function' && define.amd ) {
     // AMD
@@ -3252,7 +3252,7 @@ return Rect;
   }
 
 }( window, function factory( Rect ) {
-
+'use strict';
 
 // -------------------------- Packer -------------------------- //
 
@@ -3321,9 +3321,10 @@ Packer.prototype.placed = function( rect ) {
   }
 
   this.spaces = revisedSpaces;
-
+  
   this.mergeSortSpaces();
 };
+
 
 Packer.prototype.mergeSortSpaces = function() {
   // remove redundant spaces
@@ -3386,9 +3387,12 @@ var sorters = {
   // left to right, then top down
   rightwardTopToBottom: function( a, b ) {
     return a.x - b.x || a.y - b.y;
+  },
+  // custom tiles sorter
+  tilesSorter: function( a,b ) {
+    return a.y - b.y || a.x - b.x;
   }
 };
-
 
 // --------------------------  -------------------------- //
 
@@ -3400,7 +3404,7 @@ return Packer;
 **/
 
 ( function( window, factory ) {
-  
+  'use strict';
   // universal module definition
 
   if ( typeof define == 'function' && define.amd ) {
@@ -3428,7 +3432,7 @@ return Packer;
   }
 
 }( window, function factory( getStyleProperty, Outlayer, Rect ) {
-
+'use strict';
 
 // -------------------------- Item -------------------------- //
 
@@ -3475,6 +3479,7 @@ Item.prototype.dragStart = function() {
  * @param {Number} y - vertical position of dragged item
  */
 Item.prototype.dragMove = function( x, y ) {
+  
   this.didDrag = true;
   var packerySize = this.layout.size;
   x -= packerySize.paddingLeft;
@@ -3498,11 +3503,11 @@ Item.prototype.dragStop = function() {
  * position a rect that will occupy space in the packer
  * @param {Number} x
  * @param {Number} y
- * @param {Boolean} isMaxYContained
+ * @param {Boolean} isMaxContained
  */
-Item.prototype.positionPlaceRect = function( x, y, isMaxYOpen ) {
-  this.placeRect.x = this.getPlaceRectCoord( x, true );
-  this.placeRect.y = this.getPlaceRectCoord( y, false, isMaxYOpen );
+Item.prototype.positionPlaceRect = function( x, y, isMaxOpen ) {
+  this.placeRect.x = this.getPlaceRectCoord( x, true, isMaxOpen );
+  this.placeRect.y = this.getPlaceRectCoord( y, false, isMaxOpen );
 };
 
 /**
@@ -3517,7 +3522,7 @@ Item.prototype.getPlaceRectCoord = function( coord, isX, isMaxOpen ) {
   var size = this.size[ 'outer' + measure ];
   var segment = this.layout[ isX ? 'columnWidth' : 'rowHeight' ];
   var parentSize = this.layout.size[ 'inner' + measure ];
-
+  
   // additional parentSize calculations for Y
   if ( !isX ) {
     parentSize = Math.max( parentSize, this.layout.maxY );
@@ -3582,14 +3587,14 @@ return Item;
  * bin-packing layout library
  *
  * Licensed GPLv3 for open source use
- * or Flickity Commercial License for commercial use
+ * or Packery Commercial License for commercial use
  *
  * http://packery.metafizzy.co
  * Copyright 2015 Metafizzy
  */
 
 ( function( window, factory ) {
-  
+  'use strict';
   // universal module definition
   if ( typeof define == 'function' && define.amd ) {
     // AMD
@@ -3625,7 +3630,7 @@ return Item;
   }
 
 }( window, function factory( classie, getSize, Outlayer, Rect, Packer, Item ) {
-
+'use strict';
 
 // ----- Rect ----- //
 
@@ -3698,14 +3703,17 @@ Packery.prototype._resetLayout = function() {
   this.getSize();
 
   this._getMeasurements();
-
-  // reset packer
+  // reset packery
   var packer = this.packer;
   // packer settings, if horizontal or vertical
   if ( this.options.isHorizontal ) {
     packer.width = Number.POSITIVE_INFINITY;
     packer.height = this.size.innerHeight + this.gutter;
     packer.sortDirection = 'rightwardTopToBottom';
+  } else if ( this.options.tileMode ) {
+    packer.width = this.size.innerWidth + this.gutter;
+    packer.height = Number.POSITIVE_INFINITY;
+    packer.sortDirection = 'tilesSorter';
   } else {
     packer.width = this.size.innerWidth + this.gutter;
     packer.height = Number.POSITIVE_INFINITY;
@@ -3732,6 +3740,27 @@ Packery.prototype._getMeasurements = function() {
 Packery.prototype._getItemLayoutPosition = function( item ) {
   this._packItem( item );
   return item.rect;
+};
+
+
+Packery.prototype.addedOneBeforeEnd = function( elems ) {
+  var items = this._itemize( elems );
+  if ( !items.length ) {
+    return;
+  }
+  
+  var itemsBefore = this.items.slice(0, -1);
+  var itemsAfter = this.items.slice(-1);
+  
+  this.items = itemsBefore.concat( items ).concat( itemsAfter );
+  // start new layout
+  this._resetLayout();
+  this._manageStamps();
+  // layout new stuff without transition
+  this.layoutItems( items, true );
+  this.reveal( items );
+  // layout previous items
+  this.layout();
 };
 
 
@@ -3836,6 +3865,10 @@ Packery.prototype._manageStamp = function( elem ) {
 
 // -------------------------- methods -------------------------- //
 
+function tilesSorter( a,b ) {
+  return a.position.y - b.position.y || a.position.x - b.position.x;
+}
+
 function verticalSorter( a, b ) {
   return a.position.y - b.position.y || a.position.x - b.position.x;
 }
@@ -3845,8 +3878,24 @@ function horizontalSorter( a, b ) {
 }
 
 Packery.prototype.sortItemsByPosition = function() {
-  var sorter = this.options.isHorizontal ? horizontalSorter : verticalSorter;
+  var sorter;
+  
+  ///////////////// 
+  ///////////////// 
+  ///////////////// This gets run after a card gets dropped
+  ///////////////// 
+  ///////////////// 
+  
+  if( this.options.tileMode ) {
+    sorter = tilesSorter;
+  } else if( this.options.isHorizontal ) {
+    sorter = horizontalSorter;
+  } else {
+    sorter = verticalSorter;
+  }
+  
   this.items.sort( sorter );
+  
 };
 
 /**
@@ -3930,7 +3979,15 @@ Packery.prototype.resize = function() {
   // check that this.size and size are there
   // IE8 triggers resize on body size change, so they might not be
   var hasSizes = this.size && size;
-  var innerSize = this.options.isHorizontal ? 'innerHeight' : 'innerWidth';
+  
+  var innerSize;
+  
+  if( this.options.isHorizontal ) {
+    innerSize = 'innerHeight';
+  } else {
+    innerSize = 'innerWidth';
+  }
+  
   if ( hasSizes && size[ innerSize ] == this.size[ innerSize ] ) {
     return;
   }
