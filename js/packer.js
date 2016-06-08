@@ -3,6 +3,8 @@
  * bin-packing algorithm
  */
 
+/* jshint devel: true*/
+
 ( function( window, factory ) {
   'use strict';
   // universal module definition

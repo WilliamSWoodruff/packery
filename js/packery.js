@@ -9,6 +9,8 @@
  * Copyright 2015 Metafizzy
  */
 
+/* jshint devel: true*/
+
 ( function( window, factory ) {
   'use strict';
   // universal module definition
@@ -78,6 +80,9 @@ Packery.prototype._create = function() {
       _this.itemDragStart( this.element );
     },
     dragMove: function() {
+      if( _this.options.tileMode ) {
+        return;
+      }
       _this.itemDragMove( this.element, this.position.x, this.position.y );
     },
     dragEnd: function() {

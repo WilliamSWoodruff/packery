@@ -2,6 +2,8 @@
  * Rect
  * low-level utility class for basic geometry
  */
+ 
+ /* jshint devel: true*/
 
 ( function( window, factory ) {
   'use strict';

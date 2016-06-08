@@ -3074,6 +3074,8 @@ return Outlayer;
  * Rect
  * low-level utility class for basic geometry
  */
+ 
+ /* jshint devel: true*/
 
 ( function( window, factory ) {
   'use strict';
@@ -3233,6 +3235,8 @@ return Rect;
  * Packer
  * bin-packing algorithm
  */
+
+/* jshint devel: true*/
 
 ( function( window, factory ) {
   'use strict';
@@ -3403,6 +3407,8 @@ return Packer;
  * Packery Item Element
 **/
 
+/* jshint devel: true*/
+
 ( function( window, factory ) {
   'use strict';
   // universal module definition
@@ -3484,6 +3490,7 @@ Item.prototype.dragMove = function( x, y ) {
   var packerySize = this.layout.size;
   x -= packerySize.paddingLeft;
   y -= packerySize.paddingTop;
+  
   this.positionPlaceRect( x, y );
 };
 
@@ -3520,6 +3527,7 @@ Item.prototype.positionPlaceRect = function( x, y, isMaxOpen ) {
 Item.prototype.getPlaceRectCoord = function( coord, isX, isMaxOpen ) {
   var measure = isX ? 'Width' : 'Height';
   var size = this.size[ 'outer' + measure ];
+  // console.log(size);
   var segment = this.layout[ isX ? 'columnWidth' : 'rowHeight' ];
   var parentSize = this.layout.size[ 'inner' + measure ];
   
@@ -3593,6 +3601,8 @@ return Item;
  * Copyright 2015 Metafizzy
  */
 
+/* jshint devel: true*/
+
 ( function( window, factory ) {
   'use strict';
   // universal module definition
@@ -3662,6 +3672,10 @@ Packery.prototype._create = function() {
       _this.itemDragStart( this.element );
     },
     dragMove: function() {
+      console.log(_this.options.tileMode);
+      if( _this.options.tileMode ) {
+        return;
+      }
       _this.itemDragMove( this.element, this.position.x, this.position.y );
     },
     dragEnd: function() {
