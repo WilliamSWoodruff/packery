@@ -79,14 +79,28 @@ Item.prototype.dragStart = function() {
  * @param {Number} x - horizontal position of dragged item
  * @param {Number} y - vertical position of dragged item
  */
-Item.prototype.dragMove = function( x, y ) {
+Item.prototype.dragMove = function( packery, x, y ) {
   
-  this.didDrag = true;
-  var packerySize = this.layout.size;
-  x -= packerySize.paddingLeft;
-  y -= packerySize.paddingTop;
+  console.log(packery.tilesSwitchThreshold);
   
-  this.positionPlaceRect( x, y );
+  if( packery.options.tileMode ) {
+    // console.log("TILE MODE!!!");
+    // this.didDrag = true;
+    // var packerySize = this.layout.size;
+    // x -= packerySize.paddingLeft;
+    // y -= packerySize.paddingTop;
+    
+    // this.positionPlaceRect( x, y );
+    
+    return;
+  } else {
+    this.didDrag = true;
+    var packerySize = this.layout.size;
+    x -= packerySize.paddingLeft;
+    y -= packerySize.paddingTop;
+    
+    this.positionPlaceRect( x, y );
+  }
 };
 
 Item.prototype.dragStop = function() {

@@ -3484,14 +3484,28 @@ Item.prototype.dragStart = function() {
  * @param {Number} x - horizontal position of dragged item
  * @param {Number} y - vertical position of dragged item
  */
-Item.prototype.dragMove = function( x, y ) {
+Item.prototype.dragMove = function( packery, x, y ) {
   
-  this.didDrag = true;
-  var packerySize = this.layout.size;
-  x -= packerySize.paddingLeft;
-  y -= packerySize.paddingTop;
+  console.log(packery.tilesSwitchThreshold);
   
-  this.positionPlaceRect( x, y );
+  if( packery.options.tileMode ) {
+    // console.log("TILE MODE!!!");
+    // this.didDrag = true;
+    // var packerySize = this.layout.size;
+    // x -= packerySize.paddingLeft;
+    // y -= packerySize.paddingTop;
+    
+    // this.positionPlaceRect( x, y );
+    
+    return;
+  } else {
+    this.didDrag = true;
+    var packerySize = this.layout.size;
+    x -= packerySize.paddingLeft;
+    y -= packerySize.paddingTop;
+    
+    this.positionPlaceRect( x, y );
+  }
 };
 
 Item.prototype.dragStop = function() {
@@ -3671,12 +3685,8 @@ Packery.prototype._create = function() {
     dragStart: function() {
       _this.itemDragStart( this.element );
     },
-    dragMove: function() {
-      console.log(_this.options.tileMode);
-      if( _this.options.tileMode ) {
-        return;
-      }
-      _this.itemDragMove( this.element, this.position.x, this.position.y );
+    dragMove: function(e) {
+      _this.itemDragMove( e, this.element, this.position.x, this.position.y );
     },
     dragEnd: function() {
       _this.itemDragEnd( this.element );
@@ -3695,7 +3705,7 @@ Packery.prototype._create = function() {
       if ( !ui ) {
         return;
       }
-      _this.itemDragMove( event.currentTarget, ui.position.left, ui.position.top );
+      _this.itemDragMove( null, event.currentTarget, ui.position.left, ui.position.top );
     },
     stop: function handleUIDraggableStop( event, ui ) {
       if ( !ui ) {
@@ -4005,8 +4015,8 @@ Packery.prototype.resize = function() {
   if ( hasSizes && size[ innerSize ] == this.size[ innerSize ] ) {
     return;
   }
-
-  this.layout();
+  
+  // this.layout();
 };
 
 // -------------------------- drag -------------------------- //
@@ -4029,10 +4039,10 @@ Packery.prototype.itemDragStart = function( elem ) {
  * @param {Number} x - horizontal change in position
  * @param {Number} y - vertical change in position
  */
-Packery.prototype.itemDragMove = function( elem, x, y ) {
+Packery.prototype.itemDragMove = function( e, elem, x, y ) {
   var item = this.getItem( elem );
   if ( item ) {
-    item.dragMove( x, y );
+    item.dragMove( this, x, y );
   }
 
   // debounce
@@ -4071,7 +4081,7 @@ Packery.prototype.itemDragEnd = function( elem ) {
     this.unstamp( elem );
     return;
   }
-  // procced with dragged item
+  // proceed with dragged item
 
   classie.add( item.element, 'is-positioning-post-drag' );
 
