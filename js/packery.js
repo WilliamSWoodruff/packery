@@ -117,6 +117,16 @@ Packery.prototype._create = function() {
 /**
  * logic before any new layout
  */
+////////////
+
+Packery.prototype.oldLayout = Packery.prototype.layout;
+
+Packery.prototype.layout = function() {
+  if(!this.disableLayout) {
+    this.oldLayout();
+  }
+};
+
 Packery.prototype._resetLayout = function() {
   this.getSize();
 
@@ -427,7 +437,7 @@ Packery.prototype.itemDragStart = function( elem ) {
   this.stamp( elem );
   var item = this.getItem( elem );
   if ( item ) {
-    item.dragStart();
+    item.dragStart(this);
   }
 };
 
@@ -471,7 +481,7 @@ Packery.prototype.itemDragEnd = function( elem ) {
   var itemDidDrag;
   if ( item ) {
     itemDidDrag = item.didDrag;
-    item.dragStop();
+    item.dragStop(this);
   }
   // if elem didn't move, or if it doesn't need positioning
   // unignore and unstamp and call it a day

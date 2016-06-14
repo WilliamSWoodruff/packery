@@ -3468,7 +3468,8 @@ Item.prototype._create = function() {
 
 // -------------------------- drag -------------------------- //
 
-Item.prototype.dragStart = function() {
+Item.prototype.dragStart = function(packery) {
+  packery.disableLayout = true;
   this.getPosition();
   this.removeTransitionStyles();
   // remove transform property from transition
@@ -3562,6 +3563,7 @@ Item.prototype.dragMove = function( packery, moveVector, x, y ) {
         this.placeRect.x = tiles[i].rect.x;
         this.placeRect.y =  tiles[i].rect.y;
         tiles[i].moveTo(this.rect.x, this.rect.y);
+        
         // tiles[i].placeRect.x = origPlaceRect.x;
         // tiles[i].placeRect.y = origPlaceRect.y;
         
@@ -3594,6 +3596,7 @@ Item.prototype.distanceBetweenItems = function(pos1, pos2) {
 };
 
 Item.prototype.dragStop = function() {
+  // packery.disableLayout = false;
   this.getPosition();
   var isDiffX = this.position.x != this.placeRect.x;
   var isDiffY = this.position.y != this.placeRect.y;
@@ -3808,6 +3811,16 @@ Packery.prototype._create = function() {
 /**
  * logic before any new layout
  */
+////////////
+
+Packery.prototype.oldLayout = Packery.prototype.layout;
+
+Packery.prototype.layout = function() {
+  if(!this.disableLayout) {
+    this.oldLayout();
+  }
+};
+
 Packery.prototype._resetLayout = function() {
   this.getSize();
 
@@ -4118,7 +4131,7 @@ Packery.prototype.itemDragStart = function( elem ) {
   this.stamp( elem );
   var item = this.getItem( elem );
   if ( item ) {
-    item.dragStart();
+    item.dragStart(this);
   }
 };
 
@@ -4162,7 +4175,7 @@ Packery.prototype.itemDragEnd = function( elem ) {
   var itemDidDrag;
   if ( item ) {
     itemDidDrag = item.didDrag;
-    item.dragStop();
+    item.dragStop(this);
   }
   // if elem didn't move, or if it doesn't need positioning
   // unignore and unstamp and call it a day

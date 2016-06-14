@@ -58,7 +58,8 @@ Item.prototype._create = function() {
 
 // -------------------------- drag -------------------------- //
 
-Item.prototype.dragStart = function() {
+Item.prototype.dragStart = function(packery) {
+  packery.disableLayout = true;
   this.getPosition();
   this.removeTransitionStyles();
   // remove transform property from transition
@@ -152,6 +153,7 @@ Item.prototype.dragMove = function( packery, moveVector, x, y ) {
         this.placeRect.x = tiles[i].rect.x;
         this.placeRect.y =  tiles[i].rect.y;
         tiles[i].moveTo(this.rect.x, this.rect.y);
+        
         // tiles[i].placeRect.x = origPlaceRect.x;
         // tiles[i].placeRect.y = origPlaceRect.y;
         
@@ -183,7 +185,8 @@ Item.prototype.distanceBetweenItems = function(pos1, pos2) {
   return Math.round(Math.sqrt( (pos1.x-pos2.x)*(pos1.x-pos2.x) + (pos1.y-pos2.y)*(pos1.y-pos2.y) ));
 };
 
-Item.prototype.dragStop = function() {
+Item.prototype.dragStop = function(packery) {
+  packery.disableLayout = false;
   this.getPosition();
   var isDiffX = this.position.x != this.placeRect.x;
   var isDiffY = this.position.y != this.placeRect.y;
