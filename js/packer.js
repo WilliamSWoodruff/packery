@@ -59,6 +59,7 @@ Packer.prototype.reset = function() {
 
 // change x and y of rect to fit with in Packer's available spaces
 Packer.prototype.pack = function( rect ) {
+  
   for ( var i=0, len = this.spaces.length; i < len; i++ ) {
     var space = this.spaces[i];
     if ( space.canFit( rect ) ) {
@@ -70,6 +71,10 @@ Packer.prototype.pack = function( rect ) {
 
 Packer.prototype.placeInSpace = function( rect, space ) {
   // place rect in space
+  // console.log(rect.enablePlacement);
+  // if(!rect.enablePlacement) {
+  //   return;
+  // }
   rect.x = space.x;
   rect.y = space.y;
 
@@ -160,7 +165,7 @@ var sorters = {
     return a.x - b.x || a.y - b.y;
   },
   // custom tiles sorter
-  tilesSorter: function( a,b ) {
+  tilesSorter: function( a, b ) {
     return a.y - b.y || a.x - b.x;
   }
 };

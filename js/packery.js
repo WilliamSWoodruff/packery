@@ -79,8 +79,8 @@ Packery.prototype._create = function() {
     dragStart: function() {
       _this.itemDragStart( this.element );
     },
-    dragMove: function(e) {
-      _this.itemDragMove( e, this.element, this.position.x, this.position.y );
+    dragMove: function(e, pointer, moveVector) {
+      _this.itemDragMove( e, moveVector, this.element, this.position.x, this.position.y );
     },
     dragEnd: function() {
       _this.itemDragEnd( this.element );
@@ -99,7 +99,7 @@ Packery.prototype._create = function() {
       if ( !ui ) {
         return;
       }
-      _this.itemDragMove( null, event.currentTarget, ui.position.left, ui.position.top );
+      _this.itemDragMove( null, null, event.currentTarget, ui.position.left, ui.position.top );
     },
     stop: function handleUIDraggableStop( event, ui ) {
       if ( !ui ) {
@@ -189,7 +189,10 @@ Packery.prototype.addedOneBeforeEnd = function( elems ) {
 Packery.prototype._packItem = function( item ) {
   this._setRectSize( item.element, item.rect );
   // pack the rect in the packer
-  this.packer.pack( item.rect );
+  // if(!this.tileMode || 
+  //   (this.tileMode && item.rect.enablePlacement)) {
+    this.packer.pack( item.rect );
+  // }
   this._setMaxXY( item.rect );
 };
 
@@ -326,6 +329,7 @@ Packery.prototype.sortItemsByPosition = function() {
  * @param {Number} y - vertical destination position, optional
  */
 Packery.prototype.fit = function( elem, x, y ) {
+  
   var item = this.getItem( elem );
   if ( !item ) {
     return;
@@ -433,10 +437,10 @@ Packery.prototype.itemDragStart = function( elem ) {
  * @param {Number} x - horizontal change in position
  * @param {Number} y - vertical change in position
  */
-Packery.prototype.itemDragMove = function( e, elem, x, y ) {
+Packery.prototype.itemDragMove = function( e, moveVector, elem, x, y ) {
   var item = this.getItem( elem );
   if ( item ) {
-    item.dragMove( this, x, y );
+    item.dragMove( this, moveVector, x, y );
   }
 
   // debounce

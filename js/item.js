@@ -51,6 +51,7 @@ Item.prototype._create = function() {
   // call default _create logic
   protoCreate.call( this );
   this.rect = new Rect();
+  this.rect.enablePlacement = true;
   // rect used for placing, in drag or Packery.fit()
   this.placeRect = new Rect();
 };
@@ -79,20 +80,95 @@ Item.prototype.dragStart = function() {
  * @param {Number} x - horizontal position of dragged item
  * @param {Number} y - vertical position of dragged item
  */
-Item.prototype.dragMove = function( packery, x, y ) {
+Item.prototype.dragMove = function( packery, moveVector, x, y ) {
   
-  console.log(packery.tilesSwitchThreshold);
+  if(this.pauseDraggingMonitor) {
+    return;
+  }
   
   if( packery.options.tileMode ) {
     // console.log("TILE MODE!!!");
-    // this.didDrag = true;
-    // var packerySize = this.layout.size;
-    // x -= packerySize.paddingLeft;
-    // y -= packerySize.paddingTop;
+    //////////////
     
-    // this.positionPlaceRect( x, y );
+    var thisCenter = {};
     
-    return;
+    thisCenter.x = (this.rect.x + (this.rect.width/2)) + moveVector.x;
+    thisCenter.y = (this.rect.y + (this.rect.height/2)) + moveVector.y;
+    
+    var tiles = packery.items;
+    
+    var numTiles = tiles.length;
+    
+    var self = this;
+    var unpauseDraggingMonitor = function() {
+      self.pauseDraggingMonitor = false;
+    };
+    
+    for(var i=0; i<numTiles; i++) {
+      if(tiles[i].element.id === this.element.id) {
+        continue;
+      }
+      
+      tiles[i].rect.enablePlacement = true;
+      
+      if(this.pauseDraggingMonitor) {
+        // tiles[i].rect.enablePlacement = false;
+      }
+      
+      var tileCenter = {};
+      tileCenter.x = (tiles[i].rect.x + (tiles[i].rect.width/2));
+      tileCenter.y = (tiles[i].rect.y + (tiles[i].rect.height/2));
+      // console.log(i);
+      
+      // var tileRect = tiles[i].rect;
+      // var thisRect = this.rect;
+      
+      // if(thisRect.) {
+        
+      // }
+      
+      // console.log(this.distanceBetweenItems(thisCenter, tileCenter));
+      
+      if(this.distanceBetweenItems(thisCenter, tileCenter) < 100) {
+        
+        this.didDrag = true;
+        console.log("SWITCH WITH " + tiles[i].element.id);
+        if(tiles[i].element.tileMode === 'large') {
+          if(this.element.tileMode === 'small') {
+            this.element.transitionToCardMode('large-tile-view');
+            tiles[i].element.transitionToCardMode('small-tile-view');
+          }
+        } else {
+          if(this.element.tileMode === 'large') {
+            this.element.transitionToCardMode('small-tile-view');
+            tiles[i].element.transitionToCardMode('large-tile-view');
+          }
+        }
+        var origPlaceRect = {};
+        origPlaceRect.x = this.rect.x;
+        origPlaceRect.y = this.rect.y;
+        
+        // this.moveTo(tiles[i].rect.x, tiles[i].rect.y);
+        this.placeRect.x = tiles[i].rect.x;
+        this.placeRect.y =  tiles[i].rect.y;
+        tiles[i].moveTo(this.rect.x, this.rect.y);
+        // tiles[i].placeRect.x = origPlaceRect.x;
+        // tiles[i].placeRect.y = origPlaceRect.y;
+        
+        // Whitelist placement ability for tiles view
+        this.rect.enablePlacement = true;
+        tiles[i].rect.enablePlacement = true;
+        
+        packery.on( 'layoutComplete', unpauseDraggingMonitor );
+        
+        this.pauseDraggingMonitor = true;
+        // packery.layout();
+        ////////////////
+        // tiles[i].positionPlaceRect(this.rect.x, this.rect.y);
+        // this.positionPlaceRect(tiles[i].rect.x, tiles[i].rect.y);
+      }
+    }
+    
   } else {
     this.didDrag = true;
     var packerySize = this.layout.size;
@@ -101,6 +177,10 @@ Item.prototype.dragMove = function( packery, x, y ) {
     
     this.positionPlaceRect( x, y );
   }
+};
+
+Item.prototype.distanceBetweenItems = function(pos1, pos2) {
+  return Math.round(Math.sqrt( (pos1.x-pos2.x)*(pos1.x-pos2.x) + (pos1.y-pos2.y)*(pos1.y-pos2.y) ));
 };
 
 Item.prototype.dragStop = function() {
