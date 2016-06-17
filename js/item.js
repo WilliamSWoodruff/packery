@@ -133,7 +133,7 @@ Item.prototype.dragMove = function( packery, moveVector, x, y ) {
       tileCenter.x = (tiles[i].rect.x + (tiles[i].rect.width/2));
       tileCenter.y = (tiles[i].rect.y + (tiles[i].rect.height/2));
       
-      if(this.distanceBetweenItems(thisCenter, tileCenter) < 130) {
+      if(this.distanceBetweenItems(thisCenter, tileCenter) < 50) {
         
         if(tiles[i] == this.switchingWith) {
           return;
