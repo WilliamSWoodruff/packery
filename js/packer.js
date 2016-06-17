@@ -55,6 +55,7 @@ Packer.prototype.reset = function() {
   this.spaces.push( initialSpace );
   // set sorter
   this.sorter = sorters[ this.sortDirection ] || sorters.downwardLeftToRight;
+  
 };
 
 // change x and y of rect to fit with in Packer's available spaces
@@ -105,6 +106,7 @@ Packer.prototype.placed = function( rect ) {
 Packer.prototype.mergeSortSpaces = function() {
   // remove redundant spaces
   Packer.mergeRects( this.spaces );
+  // console.log(this.spaces);
   this.spaces.sort( this.sorter );
 };
 
@@ -166,6 +168,7 @@ var sorters = {
   },
   // custom tiles sorter
   tilesSorter: function( a, b ) {
+    // console.log(a);
     return a.y - b.y || a.x - b.x;
   }
 };

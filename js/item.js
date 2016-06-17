@@ -51,9 +51,10 @@ Item.prototype._create = function() {
   // call default _create logic
   protoCreate.call( this );
   this.rect = new Rect();
-  this.rect.enablePlacement = true;
+  // this.rect.enablePlacement = true;
   // rect used for placing, in drag or Packery.fit()
   this.placeRect = new Rect();
+  this.dragOffsetCounter = 0;
 };
 
 // -------------------------- drag -------------------------- //
@@ -74,6 +75,8 @@ Item.prototype.dragStart = function(packery) {
   this.positionPlaceRect( this.position.x, this.position.y );
   this.isTransitioning = false;
   this.didDrag = false;
+  
+  this.dragOffsetCounter = 0;
 };
 
 /**
@@ -81,15 +84,34 @@ Item.prototype.dragStart = function(packery) {
  * @param {Number} x - horizontal position of dragged item
  * @param {Number} y - vertical position of dragged item
  */
+
 Item.prototype.dragMove = function( packery, moveVector, x, y ) {
-  
-  if(this.pauseDraggingMonitor) {
-    return;
-  }
   
   if( packery.options.tileMode ) {
     // console.log("TILE MODE!!!");
     //////////////
+    
+    if(packery.options.tileMode === true) {
+      this.dragOffsetCounter += 1;
+      if(this.dragOffsetCounter !== 5) {
+        return;
+      } else {
+        this.dragOffsetCounter = 0;
+      }
+    }
+    
+    // if(this.calculatingDrag === true) {
+    //   console.log("STILL CALCING DRAG");
+    //   return;
+    // }
+    
+    // this.calculatingDrag = true;
+    
+    ///////////////////
+    
+    var origPlaceRect = {};
+    origPlaceRect.x = this.placeRect.x;
+    origPlaceRect.y = this.placeRect.y;
     
     var thisCenter = {};
     
@@ -100,76 +122,77 @@ Item.prototype.dragMove = function( packery, moveVector, x, y ) {
     
     var numTiles = tiles.length;
     
-    var self = this;
-    var unpauseDraggingMonitor = function() {
-      self.pauseDraggingMonitor = false;
-    };
+    // var self = this;
     
     for(var i=0; i<numTiles; i++) {
       if(tiles[i].element.id === this.element.id) {
         continue;
       }
       
-      tiles[i].rect.enablePlacement = true;
-      
-      if(this.pauseDraggingMonitor) {
-        // tiles[i].rect.enablePlacement = false;
-      }
-      
       var tileCenter = {};
       tileCenter.x = (tiles[i].rect.x + (tiles[i].rect.width/2));
       tileCenter.y = (tiles[i].rect.y + (tiles[i].rect.height/2));
-      // console.log(i);
       
-      // var tileRect = tiles[i].rect;
-      // var thisRect = this.rect;
-      
-      // if(thisRect.) {
+      if(this.distanceBetweenItems(thisCenter, tileCenter) < 130) {
         
-      // }
-      
-      // console.log(this.distanceBetweenItems(thisCenter, tileCenter));
-      
-      if(this.distanceBetweenItems(thisCenter, tileCenter) < 100) {
+        if(tiles[i] == this.switchingWith) {
+          return;
+        }
         
         this.didDrag = true;
         console.log("SWITCH WITH " + tiles[i].element.id);
         if(tiles[i].element.tileMode === 'large') {
+          
           if(this.element.tileMode === 'small') {
             this.element.transitionToCardMode('large-tile-view');
             tiles[i].element.transitionToCardMode('small-tile-view');
           }
+          
         } else {
           if(this.element.tileMode === 'large') {
             this.element.transitionToCardMode('small-tile-view');
             tiles[i].element.transitionToCardMode('large-tile-view');
           }
         }
-        var origPlaceRect = {};
-        origPlaceRect.x = this.rect.x;
-        origPlaceRect.y = this.rect.y;
         
-        // this.moveTo(tiles[i].rect.x, tiles[i].rect.y);
         this.placeRect.x = tiles[i].rect.x;
         this.placeRect.y =  tiles[i].rect.y;
-        tiles[i].moveTo(this.rect.x, this.rect.y);
         
-        // tiles[i].placeRect.x = origPlaceRect.x;
-        // tiles[i].placeRect.y = origPlaceRect.y;
+        tiles[i].placeRect.x = origPlaceRect.x;
+        tiles[i].placeRect.y = origPlaceRect.y;
+        
+        this.switchingWith = tiles[i];
+        
+        // tiles[i].copyPlaceRectPosition();
         
         // Whitelist placement ability for tiles view
-        this.rect.enablePlacement = true;
-        tiles[i].rect.enablePlacement = true;
         
-        packery.on( 'layoutComplete', unpauseDraggingMonitor );
-        
-        this.pauseDraggingMonitor = true;
+        // this.rect.enablePlacement = true;
+        // tiles[i].rect.enablePlacement = true;
+        // this.calculatingDrag = false;
+        // console.log(this.calculatingDrag);
         // packery.layout();
         ////////////////
         // tiles[i].positionPlaceRect(this.rect.x, this.rect.y);
         // this.positionPlaceRect(tiles[i].rect.x, tiles[i].rect.y);
+        
+        console.log(origPlaceRect);
+        this.switchingWith.moveTo(origPlaceRect.x, origPlaceRect.y);
+        this.switchingWith.copyPlaceRectPosition();
+        break;
       }
     }
+    
+    if(this.transitionTimeout) {
+      clearTimeout(this.transitionTimeout);
+      this.transitionTimeout = null;
+    }
+    
+    var self = this;
+    this.transitionTimeout = setTimeout(function() {
+      console.warn("RELEAST IS!");
+      self.switchingWith = null;
+    }, 500);
     
   } else {
     this.didDrag = true;

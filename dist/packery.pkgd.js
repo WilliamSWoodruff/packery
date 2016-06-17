@@ -3288,6 +3288,7 @@ Packer.prototype.reset = function() {
   this.spaces.push( initialSpace );
   // set sorter
   this.sorter = sorters[ this.sortDirection ] || sorters.downwardLeftToRight;
+  
 };
 
 // change x and y of rect to fit with in Packer's available spaces
@@ -3338,6 +3339,7 @@ Packer.prototype.placed = function( rect ) {
 Packer.prototype.mergeSortSpaces = function() {
   // remove redundant spaces
   Packer.mergeRects( this.spaces );
+  // console.log(this.spaces);
   this.spaces.sort( this.sorter );
 };
 
@@ -3399,6 +3401,7 @@ var sorters = {
   },
   // custom tiles sorter
   tilesSorter: function( a, b ) {
+    // console.log(a);
     return a.y - b.y || a.x - b.x;
   }
 };
@@ -3461,9 +3464,10 @@ Item.prototype._create = function() {
   // call default _create logic
   protoCreate.call( this );
   this.rect = new Rect();
-  this.rect.enablePlacement = true;
+  // this.rect.enablePlacement = true;
   // rect used for placing, in drag or Packery.fit()
   this.placeRect = new Rect();
+  this.dragOffsetCounter = 0;
 };
 
 // -------------------------- drag -------------------------- //
@@ -3484,6 +3488,8 @@ Item.prototype.dragStart = function(packery) {
   this.positionPlaceRect( this.position.x, this.position.y );
   this.isTransitioning = false;
   this.didDrag = false;
+  
+  this.dragOffsetCounter = 0;
 };
 
 /**
@@ -3491,15 +3497,34 @@ Item.prototype.dragStart = function(packery) {
  * @param {Number} x - horizontal position of dragged item
  * @param {Number} y - vertical position of dragged item
  */
+
 Item.prototype.dragMove = function( packery, moveVector, x, y ) {
-  
-  if(this.pauseDraggingMonitor) {
-    return;
-  }
   
   if( packery.options.tileMode ) {
     // console.log("TILE MODE!!!");
     //////////////
+    
+    if(packery.options.tileMode === true) {
+      this.dragOffsetCounter += 1;
+      if(this.dragOffsetCounter !== 7) {
+        return;
+      } else {
+        this.dragOffsetCounter = 0;
+      }
+    }
+    
+    // if(this.calculatingDrag === true) {
+    //   console.log("STILL CALCING DRAG");
+    //   return;
+    // }
+    
+    // this.calculatingDrag = true;
+    
+    ///////////////////
+    
+    var origPlaceRect = {};
+    origPlaceRect.x = this.placeRect.x;
+    origPlaceRect.y = this.placeRect.y;
     
     var thisCenter = {};
     
@@ -3510,76 +3535,77 @@ Item.prototype.dragMove = function( packery, moveVector, x, y ) {
     
     var numTiles = tiles.length;
     
-    var self = this;
-    var unpauseDraggingMonitor = function() {
-      self.pauseDraggingMonitor = false;
-    };
+    // var self = this;
     
     for(var i=0; i<numTiles; i++) {
       if(tiles[i].element.id === this.element.id) {
         continue;
       }
       
-      tiles[i].rect.enablePlacement = true;
-      
-      if(this.pauseDraggingMonitor) {
-        // tiles[i].rect.enablePlacement = false;
-      }
-      
       var tileCenter = {};
       tileCenter.x = (tiles[i].rect.x + (tiles[i].rect.width/2));
       tileCenter.y = (tiles[i].rect.y + (tiles[i].rect.height/2));
-      // console.log(i);
       
-      // var tileRect = tiles[i].rect;
-      // var thisRect = this.rect;
-      
-      // if(thisRect.) {
+      if(this.distanceBetweenItems(thisCenter, tileCenter) < 130) {
         
-      // }
-      
-      // console.log(this.distanceBetweenItems(thisCenter, tileCenter));
-      
-      if(this.distanceBetweenItems(thisCenter, tileCenter) < 100) {
+        if(tiles[i] == this.switchingWith) {
+          return;
+        }
         
         this.didDrag = true;
         console.log("SWITCH WITH " + tiles[i].element.id);
         if(tiles[i].element.tileMode === 'large') {
+          
           if(this.element.tileMode === 'small') {
             this.element.transitionToCardMode('large-tile-view');
             tiles[i].element.transitionToCardMode('small-tile-view');
           }
+          
         } else {
           if(this.element.tileMode === 'large') {
             this.element.transitionToCardMode('small-tile-view');
             tiles[i].element.transitionToCardMode('large-tile-view');
           }
         }
-        var origPlaceRect = {};
-        origPlaceRect.x = this.rect.x;
-        origPlaceRect.y = this.rect.y;
         
-        // this.moveTo(tiles[i].rect.x, tiles[i].rect.y);
         this.placeRect.x = tiles[i].rect.x;
         this.placeRect.y =  tiles[i].rect.y;
-        tiles[i].moveTo(this.rect.x, this.rect.y);
         
-        // tiles[i].placeRect.x = origPlaceRect.x;
-        // tiles[i].placeRect.y = origPlaceRect.y;
+        tiles[i].placeRect.x = origPlaceRect.x;
+        tiles[i].placeRect.y = origPlaceRect.y;
+        
+        this.switchingWith = tiles[i];
+        
+        // tiles[i].copyPlaceRectPosition();
         
         // Whitelist placement ability for tiles view
-        this.rect.enablePlacement = true;
-        tiles[i].rect.enablePlacement = true;
         
-        packery.on( 'layoutComplete', unpauseDraggingMonitor );
-        
-        this.pauseDraggingMonitor = true;
+        // this.rect.enablePlacement = true;
+        // tiles[i].rect.enablePlacement = true;
+        // this.calculatingDrag = false;
+        // console.log(this.calculatingDrag);
         // packery.layout();
         ////////////////
         // tiles[i].positionPlaceRect(this.rect.x, this.rect.y);
         // this.positionPlaceRect(tiles[i].rect.x, tiles[i].rect.y);
+        
+        console.log(origPlaceRect);
+        this.switchingWith.moveTo(origPlaceRect.x, origPlaceRect.y);
+        this.switchingWith.copyPlaceRectPosition();
+        break;
       }
     }
+    
+    if(this.transitionTimeout) {
+      clearTimeout(this.transitionTimeout);
+      this.transitionTimeout = null;
+    }
+    
+    var self = this;
+    this.transitionTimeout = setTimeout(function() {
+      console.warn("RELEAST IS!");
+      self.switchingWith = null;
+    }, 500);
     
   } else {
     this.didDrag = true;
@@ -3595,8 +3621,8 @@ Item.prototype.distanceBetweenItems = function(pos1, pos2) {
   return Math.round(Math.sqrt( (pos1.x-pos2.x)*(pos1.x-pos2.x) + (pos1.y-pos2.y)*(pos1.y-pos2.y) ));
 };
 
-Item.prototype.dragStop = function() {
-  // packery.disableLayout = false;
+Item.prototype.dragStop = function(packery) {
+  packery.disableLayout = false;
   this.getPosition();
   var isDiffX = this.position.x != this.placeRect.x;
   var isDiffY = this.position.y != this.placeRect.y;
@@ -3757,6 +3783,16 @@ Rect.prototype.canFit = function( rect ) {
 var Packery = Outlayer.create('packery');
 Packery.Item = Item;
 
+
+Packery.prototype.originalLayout = Packery.prototype.layout;
+
+Packery.prototype.layout = function() {
+  
+  if(!this.disableLayout) {
+    this.originalLayout();
+  }
+};
+
 Packery.prototype._create = function() {
   // call super
   Outlayer.prototype._create.call( this );
@@ -3766,6 +3802,8 @@ Packery.prototype._create = function() {
 
   // Left over from v1.0
   this.stamp( this.options.stamped );
+
+  this.dragOffsetCounter = 0;
 
   // create drag handlers
   var _this = this;
@@ -3812,14 +3850,6 @@ Packery.prototype._create = function() {
  * logic before any new layout
  */
 ////////////
-
-Packery.prototype.oldLayout = Packery.prototype.layout;
-
-Packery.prototype.layout = function() {
-  if(!this.disableLayout) {
-    this.oldLayout();
-  }
-};
 
 Packery.prototype._resetLayout = function() {
   this.getSize();
@@ -4004,13 +4034,13 @@ function horizontalSorter( a, b ) {
 
 Packery.prototype.sortItemsByPosition = function() {
   var sorter;
-  
   ///////////////// 
   ///////////////// 
   ///////////////// This gets run after a card gets dropped
   ///////////////// 
   ///////////////// 
   
+  console.log("SORT!!!");
   if( this.options.tileMode ) {
     sorter = tilesSorter;
   } else if( this.options.isHorizontal ) {
@@ -4019,7 +4049,53 @@ Packery.prototype.sortItemsByPosition = function() {
     sorter = verticalSorter;
   }
   
-  this.items.sort( sorter );
+  // console.log(this.items);
+  if( this.options.tileMode ) {
+    //////////////////
+    var smallTiles = [];
+    var largeTiles = [];
+    this.items.forEach(function(item) {
+      
+      if (item.element.tileMode === 'small') {
+        smallTiles.push(item);
+      }
+      if (item.element.tileMode === 'large') {
+        largeTiles.push(item);
+      }
+    });
+    
+    smallTiles.sort(function(a, b) {
+      return a.position.y - b.position.y;
+    });
+    
+    largeTiles.sort(function(a, b) {
+      return a.position.y - b.position.y;
+    });
+    
+    smallTiles.forEach(function(tile) {
+      console.log(tile.element.id);
+    });
+    
+    var largeTilePositions = [0, 4, 6, 10, 12, 16, 18, 22];
+    var newItems = [];
+    
+    for(var i=0; i<this.items.length; i++) {
+      // 0, 4, 6, 10, 12, 16
+      
+      if(i === largeTilePositions[0]) {
+        largeTilePositions.shift();
+        newItems.push(largeTiles.shift());
+      } else {
+        newItems.push(smallTiles.shift());
+      }
+      
+    }
+    
+    this.items = newItems;
+    
+  } else {
+    this.items.sort( sorter );
+  }
   
 };
 
@@ -4142,7 +4218,13 @@ Packery.prototype.itemDragStart = function( elem ) {
  * @param {Number} y - vertical change in position
  */
 Packery.prototype.itemDragMove = function( e, moveVector, elem, x, y ) {
+  
+  if(elem.tileDraggie.windowScrollingInProgress) {
+    return;
+  }
+  
   var item = this.getItem( elem );
+  
   if ( item ) {
     item.dragMove( this, moveVector, x, y );
   }

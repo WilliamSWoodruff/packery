@@ -63,6 +63,16 @@ Rect.prototype.canFit = function( rect ) {
 var Packery = Outlayer.create('packery');
 Packery.Item = Item;
 
+
+Packery.prototype.originalLayout = Packery.prototype.layout;
+
+Packery.prototype.layout = function() {
+  
+  if(!this.disableLayout) {
+    this.originalLayout();
+  }
+};
+
 Packery.prototype._create = function() {
   // call super
   Outlayer.prototype._create.call( this );
@@ -72,6 +82,8 @@ Packery.prototype._create = function() {
 
   // Left over from v1.0
   this.stamp( this.options.stamped );
+
+  this.dragOffsetCounter = 0;
 
   // create drag handlers
   var _this = this;
@@ -118,14 +130,6 @@ Packery.prototype._create = function() {
  * logic before any new layout
  */
 ////////////
-
-Packery.prototype.oldLayout = Packery.prototype.layout;
-
-Packery.prototype.layout = function() {
-  if(!this.disableLayout) {
-    this.oldLayout();
-  }
-};
 
 Packery.prototype._resetLayout = function() {
   this.getSize();
@@ -310,13 +314,13 @@ function horizontalSorter( a, b ) {
 
 Packery.prototype.sortItemsByPosition = function() {
   var sorter;
-  
   ///////////////// 
   ///////////////// 
   ///////////////// This gets run after a card gets dropped
   ///////////////// 
   ///////////////// 
   
+  console.log("SORT!!!");
   if( this.options.tileMode ) {
     sorter = tilesSorter;
   } else if( this.options.isHorizontal ) {
@@ -325,7 +329,53 @@ Packery.prototype.sortItemsByPosition = function() {
     sorter = verticalSorter;
   }
   
-  this.items.sort( sorter );
+  // console.log(this.items);
+  if( this.options.tileMode ) {
+    //////////////////
+    var smallTiles = [];
+    var largeTiles = [];
+    this.items.forEach(function(item) {
+      
+      if (item.element.tileMode === 'small') {
+        smallTiles.push(item);
+      }
+      if (item.element.tileMode === 'large') {
+        largeTiles.push(item);
+      }
+    });
+    
+    smallTiles.sort(function(a, b) {
+      return a.position.y - b.position.y;
+    });
+    
+    largeTiles.sort(function(a, b) {
+      return a.position.y - b.position.y;
+    });
+    
+    smallTiles.forEach(function(tile) {
+      console.log(tile.element.id);
+    });
+    
+    var largeTilePositions = [0, 4, 6, 10, 12, 16, 18, 22];
+    var newItems = [];
+    
+    for(var i=0; i<this.items.length; i++) {
+      // 0, 4, 6, 10, 12, 16
+      
+      if(i === largeTilePositions[0]) {
+        largeTilePositions.shift();
+        newItems.push(largeTiles.shift());
+      } else {
+        newItems.push(smallTiles.shift());
+      }
+      
+    }
+    
+    this.items = newItems;
+    
+  } else {
+    this.items.sort( sorter );
+  }
   
 };
 
@@ -448,7 +498,13 @@ Packery.prototype.itemDragStart = function( elem ) {
  * @param {Number} y - vertical change in position
  */
 Packery.prototype.itemDragMove = function( e, moveVector, elem, x, y ) {
+  
+  if(elem.tileDraggie.windowScrollingInProgress) {
+    return;
+  }
+  
   var item = this.getItem( elem );
+  
   if ( item ) {
     item.dragMove( this, moveVector, x, y );
   }
