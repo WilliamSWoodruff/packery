@@ -171,23 +171,7 @@ Item.prototype.dragMove = function( packery, moveVector, x, y ) {
         
         this.switchingWith.moveTo(origPlaceRect.x, origPlaceRect.y);
         
-        // tiles[i].copyPlaceRectPosition();
-        
-        // Whitelist placement ability for tiles view
-        
-        // this.rect.enablePlacement = true;
-        // tiles[i].rect.enablePlacement = true;
-        // this.calculatingDrag = false;
-        // console.log(this.calculatingDrag);
-        // packery.layout();
-        ////////////////
-        // tiles[i].positionPlaceRect(this.rect.x, this.rect.y);
-        // this.positionPlaceRect(tiles[i].rect.x, tiles[i].rect.y);
-        
-        // console.log(origPlaceRect);
-        // this.switchingWith.moveTo(origPlaceRect.x, origPlaceRect.y);
-        // this.switchingWith.copyPlaceRectPosition();
-        ///////////
+        tiles[i].copyPlaceRectPosition();
         
         break;
       }

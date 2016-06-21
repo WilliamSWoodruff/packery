@@ -63,7 +63,6 @@ Rect.prototype.canFit = function( rect ) {
 var Packery = Outlayer.create('packery');
 Packery.Item = Item;
 
-
 Packery.prototype.originalLayout = Packery.prototype.layout;
 
 Packery.prototype.layout = function() {
@@ -329,7 +328,7 @@ Packery.prototype.sortItemsByPosition = function() {
   }
   
   if( this.options.tileMode ) {
-    //////////////////
+    
     var smallTiles = [];
     var largeTiles = [];
     this.items.forEach(function(item) {
@@ -343,11 +342,27 @@ Packery.prototype.sortItemsByPosition = function() {
     });
     
     smallTiles.sort(function(a, b) {
-      return a.position.y - b.position.y;
+      var diff = a.position.y - b.position.y;
+      
+      if(diff < 0) {
+        return -1;
+      } else if (diff === 0) {
+        return 0;
+      } else {
+        return 1;
+      }
     });
     
     largeTiles.sort(function(a, b) {
-      return a.position.y - b.position.y;
+      var diff = a.position.y - b.position.y;
+      
+      if(diff < 0) {
+        return -1;
+      } else if (diff === 0) {
+        return 0;
+      } else {
+        return 1;
+      }
     });
     
     var largeTilePositions = [0, 4, 6, 10, 12, 16, 18, 22];
@@ -572,6 +587,8 @@ Packery.prototype._getDragEndLayoutComplete = function( elem, item ) {
   var asyncCount = itemNeedsPositioning ? 2 : 1;
   var _this = this;
 
+  this.sortItemsByPosition();
+  
   return function onLayoutComplete() {
     completeCount++;
     // don't proceed if not complete
