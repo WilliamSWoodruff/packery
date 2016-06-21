@@ -3305,10 +3305,7 @@ Packer.prototype.pack = function( rect ) {
 
 Packer.prototype.placeInSpace = function( rect, space ) {
   // place rect in space
-  // console.log(rect.enablePlacement);
-  // if(!rect.enablePlacement) {
-  //   return;
-  // }
+  
   rect.x = space.x;
   rect.y = space.y;
 
@@ -3339,7 +3336,6 @@ Packer.prototype.placed = function( rect ) {
 Packer.prototype.mergeSortSpaces = function() {
   // remove redundant spaces
   Packer.mergeRects( this.spaces );
-  // console.log(this.spaces);
   this.spaces.sort( this.sorter );
 };
 
@@ -3375,8 +3371,6 @@ Packer.mergeRects = function( rects ) {
       // remove that rect from test collection
       var indexAdjust = i > j ? 0 : 1;
       if ( rect.contains( compareRect ) ) {
-        // console.log( 'current test rects:' + testRects.length, testRects );
-        // console.log( i, j, indexAdjust, rect, compareRect );
         rects.splice( j + indexAdjust - removedCount, 1 );
         removedCount++;
       }
@@ -3401,7 +3395,6 @@ var sorters = {
   },
   // custom tiles sorter
   tilesSorter: function( a, b ) {
-    // console.log(a);
     return a.y - b.y || a.x - b.x;
   }
 };
@@ -3506,7 +3499,7 @@ Item.prototype.dragMove = function( packery, moveVector, x, y ) {
     
     if(packery.options.tileMode === true) {
       this.dragOffsetCounter += 1;
-      if(this.dragOffsetCounter !== 5) {
+      if(this.dragOffsetCounter !== 7) {
         return;
       } else {
         this.dragOffsetCounter = 0;
@@ -3549,6 +3542,7 @@ Item.prototype.dragMove = function( packery, moveVector, x, y ) {
       if(this.distanceBetweenItems(thisCenter, tileCenter) < 50) {
         
         if(tiles[i] == this.switchingWith) {
+          console.warn("RETURNING");
           return;
         }
         
@@ -3568,6 +3562,11 @@ Item.prototype.dragMove = function( packery, moveVector, x, y ) {
           }
         }
         
+        console.log(this.rect.width);
+        
+        this.getSize();
+        tiles[i].getSize();
+        
         this.placeRect.x = tiles[i].rect.x;
         this.placeRect.y =  tiles[i].rect.y;
         
@@ -3575,6 +3574,8 @@ Item.prototype.dragMove = function( packery, moveVector, x, y ) {
         tiles[i].placeRect.y = origPlaceRect.y;
         
         this.switchingWith = tiles[i];
+        
+        this.switchingWith.moveTo(origPlaceRect.x, origPlaceRect.y);
         
         // tiles[i].copyPlaceRectPosition();
         
@@ -3589,9 +3590,11 @@ Item.prototype.dragMove = function( packery, moveVector, x, y ) {
         // tiles[i].positionPlaceRect(this.rect.x, this.rect.y);
         // this.positionPlaceRect(tiles[i].rect.x, tiles[i].rect.y);
         
-        console.log(origPlaceRect);
-        this.switchingWith.moveTo(origPlaceRect.x, origPlaceRect.y);
-        this.switchingWith.copyPlaceRectPosition();
+        // console.log(origPlaceRect);
+        // this.switchingWith.moveTo(origPlaceRect.x, origPlaceRect.y);
+        // this.switchingWith.copyPlaceRectPosition();
+        ///////////
+        
         break;
       }
     }
@@ -3603,7 +3606,6 @@ Item.prototype.dragMove = function( packery, moveVector, x, y ) {
     
     var self = this;
     this.transitionTimeout = setTimeout(function() {
-      console.warn("RELEAST IS!");
       self.switchingWith = null;
     }, 500);
     
@@ -4040,7 +4042,6 @@ Packery.prototype.sortItemsByPosition = function() {
   ///////////////// 
   ///////////////// 
   
-  console.log("SORT!!!");
   if( this.options.tileMode ) {
     sorter = tilesSorter;
   } else if( this.options.isHorizontal ) {
@@ -4049,7 +4050,6 @@ Packery.prototype.sortItemsByPosition = function() {
     sorter = verticalSorter;
   }
   
-  // console.log(this.items);
   if( this.options.tileMode ) {
     //////////////////
     var smallTiles = [];
@@ -4070,10 +4070,6 @@ Packery.prototype.sortItemsByPosition = function() {
     
     largeTiles.sort(function(a, b) {
       return a.position.y - b.position.y;
-    });
-    
-    smallTiles.forEach(function(tile) {
-      console.log(tile.element.id);
     });
     
     var largeTilePositions = [0, 4, 6, 10, 12, 16, 18, 22];
@@ -4109,7 +4105,7 @@ Packery.prototype.sortItemsByPosition = function() {
  * @param {Number} y - vertical destination position, optional
  */
 Packery.prototype.fit = function( elem, x, y ) {
-  
+
   var item = this.getItem( elem );
   if ( !item ) {
     return;

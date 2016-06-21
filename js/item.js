@@ -93,7 +93,7 @@ Item.prototype.dragMove = function( packery, moveVector, x, y ) {
     
     if(packery.options.tileMode === true) {
       this.dragOffsetCounter += 1;
-      if(this.dragOffsetCounter !== 5) {
+      if(this.dragOffsetCounter !== 7) {
         return;
       } else {
         this.dragOffsetCounter = 0;
@@ -136,6 +136,7 @@ Item.prototype.dragMove = function( packery, moveVector, x, y ) {
       if(this.distanceBetweenItems(thisCenter, tileCenter) < 50) {
         
         if(tiles[i] == this.switchingWith) {
+          console.warn("RETURNING");
           return;
         }
         
@@ -155,6 +156,11 @@ Item.prototype.dragMove = function( packery, moveVector, x, y ) {
           }
         }
         
+        console.log(this.rect.width);
+        
+        this.getSize();
+        tiles[i].getSize();
+        
         this.placeRect.x = tiles[i].rect.x;
         this.placeRect.y =  tiles[i].rect.y;
         
@@ -162,6 +168,8 @@ Item.prototype.dragMove = function( packery, moveVector, x, y ) {
         tiles[i].placeRect.y = origPlaceRect.y;
         
         this.switchingWith = tiles[i];
+        
+        this.switchingWith.moveTo(origPlaceRect.x, origPlaceRect.y);
         
         // tiles[i].copyPlaceRectPosition();
         
@@ -176,9 +184,11 @@ Item.prototype.dragMove = function( packery, moveVector, x, y ) {
         // tiles[i].positionPlaceRect(this.rect.x, this.rect.y);
         // this.positionPlaceRect(tiles[i].rect.x, tiles[i].rect.y);
         
-        console.log(origPlaceRect);
-        this.switchingWith.moveTo(origPlaceRect.x, origPlaceRect.y);
-        this.switchingWith.copyPlaceRectPosition();
+        // console.log(origPlaceRect);
+        // this.switchingWith.moveTo(origPlaceRect.x, origPlaceRect.y);
+        // this.switchingWith.copyPlaceRectPosition();
+        ///////////
+        
         break;
       }
     }
@@ -190,7 +200,6 @@ Item.prototype.dragMove = function( packery, moveVector, x, y ) {
     
     var self = this;
     this.transitionTimeout = setTimeout(function() {
-      console.warn("RELEAST IS!");
       self.switchingWith = null;
     }, 500);
     

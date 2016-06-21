@@ -320,7 +320,6 @@ Packery.prototype.sortItemsByPosition = function() {
   ///////////////// 
   ///////////////// 
   
-  console.log("SORT!!!");
   if( this.options.tileMode ) {
     sorter = tilesSorter;
   } else if( this.options.isHorizontal ) {
@@ -329,7 +328,6 @@ Packery.prototype.sortItemsByPosition = function() {
     sorter = verticalSorter;
   }
   
-  // console.log(this.items);
   if( this.options.tileMode ) {
     //////////////////
     var smallTiles = [];
@@ -350,10 +348,6 @@ Packery.prototype.sortItemsByPosition = function() {
     
     largeTiles.sort(function(a, b) {
       return a.position.y - b.position.y;
-    });
-    
-    smallTiles.forEach(function(tile) {
-      console.log(tile.element.id);
     });
     
     var largeTilePositions = [0, 4, 6, 10, 12, 16, 18, 22];
@@ -389,7 +383,7 @@ Packery.prototype.sortItemsByPosition = function() {
  * @param {Number} y - vertical destination position, optional
  */
 Packery.prototype.fit = function( elem, x, y ) {
-  
+
   var item = this.getItem( elem );
   if ( !item ) {
     return;

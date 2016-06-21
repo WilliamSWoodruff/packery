@@ -72,10 +72,7 @@ Packer.prototype.pack = function( rect ) {
 
 Packer.prototype.placeInSpace = function( rect, space ) {
   // place rect in space
-  // console.log(rect.enablePlacement);
-  // if(!rect.enablePlacement) {
-  //   return;
-  // }
+  
   rect.x = space.x;
   rect.y = space.y;
 
@@ -106,7 +103,6 @@ Packer.prototype.placed = function( rect ) {
 Packer.prototype.mergeSortSpaces = function() {
   // remove redundant spaces
   Packer.mergeRects( this.spaces );
-  // console.log(this.spaces);
   this.spaces.sort( this.sorter );
 };
 
@@ -142,8 +138,6 @@ Packer.mergeRects = function( rects ) {
       // remove that rect from test collection
       var indexAdjust = i > j ? 0 : 1;
       if ( rect.contains( compareRect ) ) {
-        // console.log( 'current test rects:' + testRects.length, testRects );
-        // console.log( i, j, indexAdjust, rect, compareRect );
         rects.splice( j + indexAdjust - removedCount, 1 );
         removedCount++;
       }
@@ -168,7 +162,6 @@ var sorters = {
   },
   // custom tiles sorter
   tilesSorter: function( a, b ) {
-    // console.log(a);
     return a.y - b.y || a.x - b.x;
   }
 };
