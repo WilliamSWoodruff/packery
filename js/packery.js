@@ -508,8 +508,10 @@ Packery.prototype.itemDragStart = function( elem ) {
  */
 Packery.prototype.itemDragMove = function( e, moveVector, elem, x, y ) {
   
-  if(elem.tileDraggie.windowScrollingInProgress) {
-    return;
+  if(this.options.tileMode) {
+    if(elem.tileDraggie.windowScrollingInProgress) {
+      return;
+    }
   }
   
   var item = this.getItem( elem );

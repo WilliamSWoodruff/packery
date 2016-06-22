@@ -3466,7 +3466,10 @@ Item.prototype._create = function() {
 // -------------------------- drag -------------------------- //
 
 Item.prototype.dragStart = function(packery) {
-  packery.disableLayout = true;
+  
+  if(packery.options.tileMode) {
+    packery.disableLayout = true;
+  }
   this.getPosition();
   this.removeTransitionStyles();
   // remove transform property from transition
@@ -3608,7 +3611,9 @@ Item.prototype.distanceBetweenItems = function(pos1, pos2) {
 };
 
 Item.prototype.dragStop = function(packery) {
-  packery.disableLayout = false;
+  if(packery.options.tileMode) {
+    packery.disableLayout = false;
+  }
   this.getPosition();
   var isDiffX = this.position.x != this.placeRect.x;
   var isDiffY = this.position.y != this.placeRect.y;
@@ -4214,8 +4219,10 @@ Packery.prototype.itemDragStart = function( elem ) {
  */
 Packery.prototype.itemDragMove = function( e, moveVector, elem, x, y ) {
   
-  if(elem.tileDraggie.windowScrollingInProgress) {
-    return;
+  if(this.options.tileMode) {
+    if(elem.tileDraggie.windowScrollingInProgress) {
+      return;
+    }
   }
   
   var item = this.getItem( elem );
