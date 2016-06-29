@@ -91,8 +91,6 @@ Item.prototype.dragStart = function(packery) {
 Item.prototype.dragMove = function( packery, moveVector, x, y ) {
   
   if( packery.options.tileMode ) {
-    // console.log("TILE MODE!!!");
-    //////////////
     
     if(packery.options.tileMode === true) {
       this.dragOffsetCounter += 1;
@@ -102,15 +100,6 @@ Item.prototype.dragMove = function( packery, moveVector, x, y ) {
         this.dragOffsetCounter = 0;
       }
     }
-    
-    // if(this.calculatingDrag === true) {
-    //   console.log("STILL CALCING DRAG");
-    //   return;
-    // }
-    
-    // this.calculatingDrag = true;
-    
-    ///////////////////
     
     var origPlaceRect = {};
     origPlaceRect.x = this.placeRect.x;
@@ -138,13 +127,11 @@ Item.prototype.dragMove = function( packery, moveVector, x, y ) {
       
       if(this.distanceBetweenItems(thisCenter, tileCenter) < 50) {
         
-        if(tiles[i] == this.switchingWith) {
-          console.warn("RETURNING");
+        if(tiles[i] == this.switchingWith || tiles[i].element.id === 'tileViewPlus') {
           return;
         }
         
         this.didDrag = true;
-        console.log("SWITCH WITH " + tiles[i].element.id);
         if(tiles[i].element.tileMode === 'large') {
           
           if(this.element.tileMode === 'small') {
@@ -158,8 +145,6 @@ Item.prototype.dragMove = function( packery, moveVector, x, y ) {
             tiles[i].element.transitionToCardMode('large-tile-view');
           }
         }
-        
-        console.log(this.rect.width);
         
         this.getSize();
         tiles[i].getSize();
@@ -240,7 +225,6 @@ Item.prototype.positionPlaceRect = function( x, y, isMaxOpen ) {
 Item.prototype.getPlaceRectCoord = function( coord, isX, isMaxOpen ) {
   var measure = isX ? 'Width' : 'Height';
   var size = this.size[ 'outer' + measure ];
-  // console.log(size);
   var segment = this.layout[ isX ? 'columnWidth' : 'rowHeight' ];
   var parentSize = this.layout.size[ 'inner' + measure ];
   
