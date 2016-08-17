@@ -91,7 +91,7 @@ Packery.prototype._create = function() {
       _this.itemDragStart( this.element );
     },
     dragMove: function(e, pointer, moveVector) {
-      _this.itemDragMove( e, moveVector, this.element, this.position.x, this.position.y );
+      _this.itemDragMove( e, moveVector, this.element, this.position.x, this.position.y, pointer );
     },
     dragEnd: function() {
       _this.itemDragEnd( this.element );
@@ -110,7 +110,7 @@ Packery.prototype._create = function() {
       if ( !ui ) {
         return;
       }
-      _this.itemDragMove( null, null, event.currentTarget, ui.position.left, ui.position.top );
+      _this.itemDragMove( null, null, event.currentTarget, ui.position.left, ui.position.top, null );
     },
     stop: function handleUIDraggableStop( event, ui ) {
       if ( !ui ) {
@@ -131,6 +131,7 @@ Packery.prototype._create = function() {
 ////////////
 
 Packery.prototype._resetLayout = function() {
+  
   this.getSize();
 
   this._getMeasurements();
@@ -200,6 +201,7 @@ Packery.prototype.addedOneBeforeEnd = function( elems ) {
  * @param {Packery.Item} item
  */
 Packery.prototype._packItem = function( item ) {
+
   this._setRectSize( item.element, item.rect );
   // pack the rect in the packer
   // if(!this.tileMode || 
@@ -313,6 +315,7 @@ function horizontalSorter( a, b ) {
 
 Packery.prototype.sortItemsByPosition = function() {
   var sorter;
+  
   ///////////////// 
   ///////////////// 
   ///////////////// This gets run after a card gets dropped
@@ -399,6 +402,8 @@ Packery.prototype.sortItemsByPosition = function() {
  */
 Packery.prototype.fit = function( elem, x, y ) {
 
+  console.log('hi fit');
+
   var item = this.getItem( elem );
   if ( !item ) {
     return;
@@ -465,23 +470,26 @@ Packery.prototype._bindFitEvents = function( item ) {
 
 // debounced, layout on resize
 Packery.prototype.resize = function() {
-  // don't trigger if size did not change
-  var size = getSize( this.element );
-  // check that this.size and size are there
-  // IE8 triggers resize on body size change, so they might not be
-  var hasSizes = this.size && size;
   
-  var innerSize;
+  return;
   
-  if( this.options.isHorizontal ) {
-    innerSize = 'innerHeight';
-  } else {
-    innerSize = 'innerWidth';
-  }
+  // // don't trigger if size did not change
+  // var size = getSize( this.element );
+  // // check that this.size and size are there
+  // // IE8 triggers resize on body size change, so they might not be
+  // var hasSizes = this.size && size;
   
-  if ( hasSizes && size[ innerSize ] == this.size[ innerSize ] ) {
-    return;
-  }
+  // var innerSize;
+  
+  // if( this.options.isHorizontal ) {
+  //   innerSize = 'innerHeight';
+  // } else {
+  //   innerSize = 'innerWidth';
+  // }
+  
+  // if ( hasSizes && size[ innerSize ] == this.size[ innerSize ] ) {
+  //   return;
+  // }
   
   // this.layout();
 };
@@ -506,7 +514,7 @@ Packery.prototype.itemDragStart = function( elem ) {
  * @param {Number} x - horizontal change in position
  * @param {Number} y - vertical change in position
  */
-Packery.prototype.itemDragMove = function( e, moveVector, elem, x, y ) {
+Packery.prototype.itemDragMove = function( e, moveVector, elem, x, y, pointer ) {
   
   if(this.options.tileMode) {
     if(elem.tileDraggie.windowScrollingInProgress) {
@@ -517,7 +525,7 @@ Packery.prototype.itemDragMove = function( e, moveVector, elem, x, y ) {
   var item = this.getItem( elem );
   
   if ( item ) {
-    item.dragMove( this, moveVector, x, y );
+    item.dragMove( this, moveVector, x, y, pointer );
   }
 
   // debounce

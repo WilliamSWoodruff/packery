@@ -88,7 +88,7 @@ Item.prototype.dragStart = function(packery) {
  * @param {Number} y - vertical position of dragged item
  */
 
-Item.prototype.dragMove = function( packery, moveVector, x, y ) {
+Item.prototype.dragMove = function( packery, moveVector, x, y, pointer ) {
   
   if( packery.options.tileMode ) {
     
@@ -105,19 +105,21 @@ Item.prototype.dragMove = function( packery, moveVector, x, y ) {
     origPlaceRect.x = this.placeRect.x;
     origPlaceRect.y = this.placeRect.y;
     
-    var thisCenter = {};
     
-    thisCenter.x = (this.rect.x + (this.rect.width/2)) + moveVector.x;
-    thisCenter.y = (this.rect.y + (this.rect.height/2)) + moveVector.y;
+    // Hard-coded Packery container offsets
+    // top: 68px
+    // left: 18px
+    
+    var pointerPos = {x: pointer.x - 18, y: (pointer.y - 68) + this.element.scrollElement.scrollTop};
+    
     
     var tiles = packery.items;
     
     var numTiles = tiles.length;
     
-    // var self = this;
-    
     for(var i=0; i<numTiles; i++) {
-      if(tiles[i].element.id === this.element.id) {
+      if(tiles[i] == this.switchingWith ||
+         tiles[i].element.id === this.element.id) {
         continue;
       }
       
@@ -125,9 +127,9 @@ Item.prototype.dragMove = function( packery, moveVector, x, y ) {
       tileCenter.x = (tiles[i].rect.x + (tiles[i].rect.width/2));
       tileCenter.y = (tiles[i].rect.y + (tiles[i].rect.height/2));
       
-      if(this.distanceBetweenItems(thisCenter, tileCenter) < 50) {
+      if(this.distanceBetweenItems(pointerPos, tileCenter) < 85) {
         
-        if(tiles[i] == this.switchingWith || tiles[i].element.id === 'tileViewPlus') {
+        if(tiles[i].element.id === 'tileViewPlus' || tiles[i].element.id === 'nysba') {
           return;
         }
         
@@ -135,19 +137,18 @@ Item.prototype.dragMove = function( packery, moveVector, x, y ) {
         if(tiles[i].element.tileMode === 'large') {
           
           if(this.element.tileMode === 'small') {
+            this.switchingSize = true;
             this.element.transitionToCardMode('large-tile-view');
             tiles[i].element.transitionToCardMode('small-tile-view');
           }
           
         } else {
           if(this.element.tileMode === 'large') {
+            this.switchingSize = true;
             this.element.transitionToCardMode('small-tile-view');
             tiles[i].element.transitionToCardMode('large-tile-view');
           }
         }
-        
-        this.getSize();
-        tiles[i].getSize();
         
         this.placeRect.x = tiles[i].rect.x;
         this.placeRect.y =  tiles[i].rect.y;
@@ -165,15 +166,24 @@ Item.prototype.dragMove = function( packery, moveVector, x, y ) {
       }
     }
     
-    if(this.transitionTimeout) {
-      clearTimeout(this.transitionTimeout);
-      this.transitionTimeout = null;
+    if(this.switchingWith && !this.transitionTimeout) {
+      
+      var self = this;
+      this.transitionTimeout = setTimeout(function() {
+        
+        if(self.switchingSize === true) {
+          packery._setRectSize(self.element, self.rect);
+          packery._setRectSize(self.switchingWith.element, self.switchingWith.rect);
+        }
+        
+        self.copyPlaceRectPosition();
+        self.switchingWith.copyPlaceRectPosition();
+        
+        self.switchingWith = null;
+        self.transitionTimeout = null;
+        
+      }, 500);
     }
-    
-    var self = this;
-    this.transitionTimeout = setTimeout(function() {
-      self.switchingWith = null;
-    }, 500);
     
   } else {
     this.didDrag = true;
