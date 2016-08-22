@@ -110,7 +110,7 @@ Item.prototype.dragMove = function( packery, moveVector, x, y, pointer ) {
     // top: 68px
     // left: 18px
     
-    var pointerPos = {x: pointer.x - 18, y: (pointer.y - 68) + this.element.scrollElement.scrollTop};
+    var pointerPos = {x: pointer.pageX - 18, y: (pointer.pageY - 68) + this.element.scrollElement.scrollTop};
     
     
     var tiles = packery.items;
